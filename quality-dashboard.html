@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quality Dashboard | ISO9001 / IATF16949</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #1c2128;
+  --border: #30363d;
+  --accent: #f0883e;
+  --accent2: #58a6ff;
+  --green: #3fb950;
+  --red: #f85149;
+  --yellow: #d29922;
+  --purple: #bc8cff;
+  --text: #e6edf3;
+  --muted: #7d8590;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Noto Sans JP', sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; }
+
+/* NAV */
+.nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: sticky; top:0; z-index:100;
+  overflow-x: auto;
+}
+.nav-brand {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  padding: 16px 20px 16px 0;
+  border-right: 1px solid var(--border);
+  margin-right: 8px;
+  white-space: nowrap;
+}
+.nav-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); font-family: var(--sans); font-size: 13px;
+  padding: 16px 14px; border-bottom: 2px solid transparent;
+  transition: all 0.2s; white-space: nowrap;
+}
+.nav-btn:hover { color: var(--text); }
+.nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* PAGES */
+.page { display:none; padding: 24px; max-width: 900px; margin: 0 auto; animation: fadeIn 0.3s ease; }
+.page.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* CARD */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.card-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px; height: 14px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media(max-width:600px) { .form-grid,.form-grid-3 { grid-template-columns:1fr; } }
+.field { display:flex; flex-direction:column; gap:6px; }
+.field label { font-size:11px; color:var(--muted); font-family:var(--mono); letter-spacing:0.1em; text-transform:uppercase; }
+.field input, .field select, .field textarea {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text);
+  font-family: var(--mono); font-size: 14px;
+  padding: 10px 12px; outline: none;
+  transition: border-color 0.2s;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent2); }
+.field textarea { resize: vertical; min-height: 80px; }
+
+/* BUTTON */
+.btn {
+  background: var(--accent); color: #000; border: none;
+  border-radius: 6px; padding: 10px 20px;
+  font-family: var(--mono); font-size: 12px; font-weight: 700;
+  letter-spacing: 0.1em; cursor: pointer;
+  transition: opacity 0.2s; text-transform: uppercase;
+}
+.btn:hover { opacity: 0.85; }
+.btn-ghost {
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { color: var(--text); border-color: var(--text); opacity:1; }
+
+/* RESULT BOX */
+.result-box {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px; margin-top: 20px;
+}
+.result-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.result-row:last-child { border-bottom: none; }
+.result-label { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.result-value { font-family: var(--mono); font-size: 18px; font-weight: 700; }
+.val-green { color: var(--green); }
+.val-yellow { color: var(--yellow); }
+.val-red { color: var(--red); }
+.val-blue { color: var(--accent2); }
+.val-orange { color: var(--accent); }
+
+/* PROGRESS BAR */
+.progress-wrap { margin-top: 12px; }
+.progress-label { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:6px; }
+.progress-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.progress-fill { height:100%; border-radius:4px; transition: width 0.6s ease; }
+
+/* BADGE */
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.badge-green { background: rgba(63,185,80,0.15); color: var(--green); }
+.badge-yellow { background: rgba(210,153,34,0.15); color: var(--yellow); }
+.badge-red { background: rgba(248,81,73,0.15); color: var(--red); }
+
+/* DIVIDER */
+.divider { height:1px; background:var(--border); margin: 20px 0; }
+
+/* QUIZ */
+.quiz-question {
+  font-size: 16px; line-height: 1.7; color: var(--text);
+  margin-bottom: 20px; padding: 16px;
+  background: var(--surface2); border-radius: 6px;
+  border-left: 3px solid var(--accent2);
+}
+.quiz-options { display:flex; flex-direction:column; gap:10px; }
+.quiz-option {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 12px 16px;
+  cursor: pointer; transition: all 0.2s;
+  font-size: 14px;
+}
+.quiz-option:hover { border-color: var(--accent2); color: var(--accent2); }
+.quiz-option.correct { border-color: var(--green); background: rgba(63,185,80,0.1); color: var(--green); }
+.quiz-option.wrong { border-color: var(--red); background: rgba(248,81,73,0.1); color: var(--red); }
+.quiz-explain {
+  margin-top: 16px; padding: 14px;
+  background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.2);
+  border-radius: 6px; font-size: 13px; color: var(--accent2); line-height:1.7;
+  display:none;
+}
+.quiz-meta { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.quiz-score { font-family:var(--mono); font-size:13px; color:var(--muted); }
+.quiz-clause { font-family:var(--mono); font-size:10px; color:var(--purple); letter-spacing:0.1em; }
+
+/* 8D */
+.d-steps { display:flex; flex-direction:column; gap:12px; }
+.d-step {
+  display:grid; grid-template-columns: 48px 1fr; gap:12px; align-items:start;
+}
+.d-num {
+  width:40px; height:40px; border-radius:8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:12px; font-weight:700; color:var(--accent);
+}
+
+/* FMEA TABLE */
+.fmea-table { width:100%; border-collapse:collapse; font-size:12px; }
+.fmea-table th {
+  background:var(--surface2); padding:8px 10px; text-align:left;
+  font-family:var(--mono); font-size:10px; letter-spacing:0.1em;
+  color:var(--muted); border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.fmea-table td { padding:8px 10px; border-bottom:1px solid var(--border); }
+.fmea-table tr:last-child td { border-bottom:none; }
+.fmea-table input[type=number] {
+  width:50px; background:var(--bg); border:1px solid var(--border);
+  border-radius:4px; color:var(--text); font-family:var(--mono);
+  font-size:12px; padding:4px 6px; text-align:center;
+}
+.fmea-table input[type=text] {
+  width:100%; background:var(--bg); border:1px solid var(--border);
+  border-radius:4px; color:var(--text); font-family:var(--mono);
+  font-size:12px; padding:4px 6px;
+}
+.rpn-cell { font-family:var(--mono); font-weight:700; font-size:14px; }
+
+/* 5WHY */
+.why-chain { display:flex; flex-direction:column; gap:0; }
+.why-item { display:grid; grid-template-columns:32px 1fr; gap:0; }
+.why-connector {
+  display:flex; flex-direction:column; align-items:center;
+}
+.why-circle {
+  width:28px; height:28px; border-radius:50%;
+  background:var(--surface2); border:2px solid var(--accent);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:10px; font-weight:700; color:var(--accent);
+  flex-shrink:0; margin-top:8px;
+}
+.why-line { width:2px; flex:1; background:var(--border); margin: 4px auto; min-height:12px; }
+.why-content { padding: 8px 0 8px 12px; }
+.why-content input {
+  width:100%; background:var(--bg); border:1px solid var(--border);
+  border-radius:6px; color:var(--text); font-family:var(--sans);
+  font-size:14px; padding:10px 12px; outline:none;
+  transition:border-color 0.2s;
+}
+.why-content input:focus { border-color: var(--accent2); }
+.why-label { font-size:10px; color:var(--muted); font-family:var(--mono); margin-bottom:4px; letter-spacing:0.1em; }
+
+/* CHECKLIST */
+.check-items { display:flex; flex-direction:column; gap:8px; }
+.check-item {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 14px; background:var(--surface2);
+  border:1px solid var(--border); border-radius:6px;
+  cursor:pointer; transition: all 0.2s;
+}
+.check-item:hover { border-color: var(--accent2); }
+.check-item.checked { border-color: var(--green); background: rgba(63,185,80,0.06); }
+.check-item input[type=checkbox] { display:none; }
+.check-box {
+  width:18px; height:18px; border:2px solid var(--border);
+  border-radius:4px; flex-shrink:0; display:flex;
+  align-items:center; justify-content:center;
+  transition: all 0.2s; font-size:11px;
+}
+.check-item.checked .check-box { background:var(--green); border-color:var(--green); color:#000; }
+.check-text { font-size:13px; flex:1; }
+.check-item.checked .check-text { text-decoration:line-through; color:var(--muted); }
+.check-clause { font-family:var(--mono); font-size:10px; color:var(--purple); margin-left:auto; }
+
+/* SAMPLING TABLE */
+.aql-table { width:100%; border-collapse:collapse; font-size:12px; margin-top:16px; }
+.aql-table th { background:var(--surface2); padding:8px 12px; text-align:center; font-family:var(--mono); font-size:10px; color:var(--muted); border:1px solid var(--border); }
+.aql-table td { padding:8px 12px; text-align:center; border:1px solid var(--border); font-family:var(--mono); }
+.aql-table tr.highlight td { background:rgba(240,136,62,0.1); color:var(--accent); font-weight:700; }
+
+/* PAGE HEADER */
+.page-header { margin-bottom: 28px; }
+.page-header h2 { font-size:20px; font-weight:700; margin-bottom:4px; }
+.page-header p { font-size:13px; color:var(--muted); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">QA TOOLS</div>
+  <button class="nav-btn active" onclick="showPage('ppm')">不良率/PPM</button>
+  <button class="nav-btn" onclick="showPage('cpk')">Cpk</button>
+  <button class="nav-btn" onclick="showPage('oee')">OEE</button>
+  <button class="nav-btn" onclick="showPage('fmea')">FMEA</button>
+  <button class="nav-btn" onclick="showPage('sampling')">サンプリング</button>
+  <button class="nav-btn" onclick="showPage('eightd')">8D</button>
+  <button class="nav-btn" onclick="showPage('fivewhy')">5Why</button>
+  <button class="nav-btn" onclick="showPage('checklist')">監査CL</button>
+  <button class="nav-btn" onclick="showPage('quiz')">ISOクイズ</button>
+</nav>
+
+<!-- ==================== PPM ==================== -->
+<div id="page-ppm" class="page active">
+  <div class="page-header">
+    <h2>不良率 / PPM 計算機</h2>
+    <p>生産数と不良数を入力してください</p>
+  </div>
+  <div class="card">
+    <div class="card-title">入力</div>
+    <div class="form-grid">
+      <div class="field"><label>総生産数</label><input type="number" id="ppm-total" value="5000" min="1"></div>
+      <div class="field"><label>不良数</label><input type="number" id="ppm-ng" value="12" min="0"></div>
+      <div class="field"><label>目標PPM（任意）</label><input type="number" id="ppm-target" value="1000" min="0"></div>
+      <div class="field"><label>コスト/個（円・任意）</label><input type="number" id="ppm-cost" value="0" min="0"></div>
+    </div>
+    <br>
+    <button class="btn" onclick="calcPPM()">計算する</button>
+  </div>
+  <div class="result-box" id="ppm-result" style="display:none">
+    <div class="result-row"><span class="result-label">不良率</span><span class="result-value" id="r-rate"></span></div>
+    <div class="result-row"><span class="result-label">PPM</span><span class="result-value" id="r-ppm"></span></div>
+    <div class="result-row"><span class="result-label">良品数</span><span class="result-value" id="r-good"></span></div>
+    <div class="result-row"><span class="result-label">目標PPMとの差</span><span class="result-value" id="r-diff"></span></div>
+    <div class="result-row"><span class="result-label">損失コスト（推定）</span><span class="result-value" id="r-loss"></span></div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>不良率レベル</span><span id="r-level"></span></div>
+      <div class="progress-bar"><div class="progress-fill" id="r-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CPK ==================== -->
+<div id="page-cpk" class="page">
+  <div class="page-header">
+    <h2>Cpk 工程能力指数</h2>
+    <p>工程の安定性を数値化します（IATF 8.5.1）</p>
+  </div>
+  <div class="card">
+    <div class="card-title">入力</div>
+    <div class="form-grid-3">
+      <div class="field"><label>規格上限 USL</label><input type="number" id="cpk-usl" value="10.5" step="0.001"></div>
+      <div class="field"><label>規格下限 LSL</label><input type="number" id="cpk-lsl" value="9.5" step="0.001"></div>
+      <div class="field"><label>平均値 x̄</label><input type="number" id="cpk-mean" value="10.1" step="0.001"></div>
+      <div class="field"><label>標準偏差 σ</label><input type="number" id="cpk-sigma" value="0.12" step="0.001"></div>
+    </div>
+    <br>
+    <button class="btn" onclick="calcCpk()">計算する</button>
+  </div>
+  <div class="result-box" id="cpk-result" style="display:none">
+    <div class="result-row"><span class="result-label">Cp（工程能力）</span><span class="result-value" id="r-cp"></span></div>
+    <div class="result-row"><span class="result-label">Cpk（偏り考慮）</span><span class="result-value" id="r-cpk"></span></div>
+    <div class="result-row"><span class="result-label">CPU（上側）</span><span class="result-value" id="r-cpu"></span></div>
+    <div class="result-row"><span class="result-label">CPL（下側）</span><span class="result-value" id="r-cpl"></span></div>
+    <div class="result-row"><span class="result-label">判定</span><span class="result-value" id="r-cpk-judge"></span></div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Cpk レベル</span><span id="r-cpk-bar-label"></span></div>
+      <div class="progress-bar"><div class="progress-fill" id="r-cpk-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">判定基準（IATF参考）</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px;">
+      <div style="padding:12px;background:rgba(63,185,80,0.08);border:1px solid rgba(63,185,80,0.2);border-radius:6px;">
+        <div style="color:var(--green);font-family:var(--mono);font-weight:700;margin-bottom:4px;">Cpk ≥ 1.67</div>
+        <div style="color:var(--muted);">優秀 — 新工程要求</div>
+      </div>
+      <div style="padding:12px;background:rgba(88,166,255,0.08);border:1px solid rgba(88,166,255,0.2);border-radius:6px;">
+        <div style="color:var(--accent2);font-family:var(--mono);font-weight:700;margin-bottom:4px;">1.33 ≤ Cpk < 1.67</div>
+        <div style="color:var(--muted);">良好 — 量産継続OK</div>
+      </div>
+      <div style="padding:12px;background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.2);border-radius:6px;">
+        <div style="color:var(--red);font-family:var(--mono);font-weight:700;margin-bottom:4px;">Cpk < 1.33</div>
+        <div style="color:var(--muted);">要改善 — 即対策</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== OEE ==================== -->
+<div id="page-oee" class="page">
+  <div class="page-header">
+    <h2>OEE 総合設備効率</h2>
+    <p>設備の稼働状況を総合評価します（IATF 8.5.1）</p>
+  </div>
+  <div class="card">
+    <div class="card-title">入力</div>
+    <div class="form-grid">
+      <div class="field"><label>計画稼働時間（分）</label><input type="number" id="oee-plan" value="480"></div>
+      <div class="field"><label>停止時間（分）</label><input type="number" id="oee-stop" value="30"></div>
+      <div class="field"><label>理論サイクルタイム（秒/個）</label><input type="number" id="oee-cycle" value="12" step="0.1"></div>
+      <div class="field"><label>実生産数（個）</label><input type="number" id="oee-actual" value="2000"></div>
+      <div class="field"><label>不良数（個）</label><input type="number" id="oee-ng" value="20"></div>
+    </div>
+    <br>
+    <button class="btn" onclick="calcOEE()">計算する</button>
+  </div>
+  <div class="result-box" id="oee-result" style="display:none">
+    <div class="result-row"><span class="result-label">稼働率 A（Availability）</span><span class="result-value" id="r-avail"></span></div>
+    <div class="result-row"><span class="result-label">性能率 P（Performance）</span><span class="result-value" id="r-perf"></span></div>
+    <div class="result-row"><span class="result-label">品質率 Q（Quality）</span><span class="result-value" id="r-qual"></span></div>
+    <div class="result-row"><span class="result-label">OEE = A × P × Q</span><span class="result-value" id="r-oee"></span></div>
+    <div class="result-row"><span class="result-label">判定</span><span class="result-value" id="r-oee-judge"></span></div>
+  </div>
+</div>
+
+<!-- ==================== FMEA ==================== -->
+<div id="page-fmea" class="page">
+  <div class="page-header">
+    <h2>FMEA リスク計算機</h2>
+    <p>S（重篤度）× O（発生度）× D（検出度）= RPN（リスク優先数）</p>
+  </div>
+  <div class="card">
+    <div class="card-title">FMEA シート</div>
+    <div style="overflow-x:auto;">
+    <table class="fmea-table">
+      <thead>
+        <tr>
+          <th>工程/機能</th>
+          <th>故障モード</th>
+          <th>影響</th>
+          <th>S<br>1-10</th>
+          <th>原因</th>
+          <th>O<br>1-10</th>
+          <th>現行管理</th>
+          <th>D<br>1-10</th>
+          <th>RPN</th>
+          <th>優先</th>
+        </tr>
+      </thead>
+      <tbody id="fmea-body">
+      </tbody>
+    </table>
+    </div>
+    <br>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn" onclick="addFmeaRow()">＋ 行を追加</button>
+      <button class="btn btn-ghost" onclick="calcAllRPN()">RPN 再計算</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">RPN 判定基準</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px;">
+      <div style="padding:12px;background:rgba(63,185,80,0.08);border:1px solid rgba(63,185,80,0.2);border-radius:6px;">
+        <div style="color:var(--green);font-family:var(--mono);font-weight:700;margin-bottom:4px;">RPN ≤ 50</div>
+        <div style="color:var(--muted);">低リスク — 監視継続</div>
+      </div>
+      <div style="padding:12px;background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.2);border-radius:6px;">
+        <div style="color:var(--yellow);font-family:var(--mono);font-weight:700;margin-bottom:4px;">51 ≤ RPN ≤ 100</div>
+        <div style="color:var(--muted);">中リスク — 改善計画</div>
+      </div>
+      <div style="padding:12px;background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.2);border-radius:6px;">
+        <div style="color:var(--red);font-family:var(--mono);font-weight:700;margin-bottom:4px;">RPN > 100</div>
+        <div style="color:var(--muted);">高リスク — 即時対策</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SAMPLING ==================== -->
+<div id="page-sampling" class="page">
+  <div class="page-header">
+    <h2>サンプリング計画（AQL）</h2>
+    <p>ISO 2859-1 / MIL-STD-1916 に基づくサンプル数算出</p>
+  </div>
+  <div class="card">
+    <div class="card-title">入力</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>ロットサイズ</label>
+        <input type="number" id="aql-lot" value="1000" min="1">
+      </div>
+      <div class="field">
+        <label>AQL（合格品質水準）</label>
+        <select id="aql-level">
+          <option value="0.65">AQL 0.65</option>
+          <option value="1.0">AQL 1.0</option>
+          <option value="1.5">AQL 1.5</option>
+          <option value="2.5" selected>AQL 2.5</option>
+          <option value="4.0">AQL 4.0</option>
+          <option value="6.5">AQL 6.5</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>検査水準</label>
+        <select id="aql-inspect">
+          <option value="normal" selected>普通検査（Level II）</option>
+          <option value="tightened">きつい検査（Level III）</option>
+          <option value="reduced">ゆるい検査（Level I）</option>
+        </select>
+      </div>
+    </div>
+    <br>
+    <button class="btn" onclick="calcAQL()">サンプル数を算出</button>
+  </div>
+  <div class="result-box" id="aql-result" style="display:none">
+    <div class="result-row"><span class="result-label">検査方式コード</span><span class="result-value val-blue" id="r-aql-code"></span></div>
+    <div class="result-row"><span class="result-label">サンプル数</span><span class="result-value val-orange" id="r-aql-n"></span></div>
+    <div class="result-row"><span class="result-label">合格判定数 Ac</span><span class="result-value val-green" id="r-aql-ac"></span></div>
+    <div class="result-row"><span class="result-label">不合格判定数 Re</span><span class="result-value val-red" id="r-aql-re"></span></div>
+    <div class="result-row"><span class="result-label">サンプリング率</span><span class="result-value" id="r-aql-rate"></span></div>
+  </div>
+</div>
+
+<!-- ==================== 8D ==================== -->
+<div id="page-eightd" class="page">
+  <div class="page-header">
+    <h2>8D 報告書</h2>
+    <p>顧客クレーム・重大不適合への体系的対応（IATF 10.2）</p>
+  </div>
+  <div class="card">
+    <div class="card-title">基本情報</div>
+    <div class="form-grid">
+      <div class="field"><label>問題番号</label><input type="text" id="d-num" placeholder="8D-2024-001"></div>
+      <div class="field"><label>発生日</label><input type="date" id="d-date"></div>
+      <div class="field"><label>製品名/品番</label><input type="text" id="d-product" placeholder="Part No."></div>
+      <div class="field"><label>担当者</label><input type="text" id="d-owner" placeholder="氏名"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">8Dステップ</div>
+    <div class="d-steps">
+      <div class="d-step">
+        <div class="d-num">D1</div>
+        <div class="field" style="width:100%"><label>チーム編成</label><textarea id="d1" placeholder="対応チームメンバーと役割を記載"></textarea></div>
+      </div>
+      <div class="d-step">
+        <div class="d-num">D2</div>
+        <div class="field" style="width:100%"><label>問題の記述（5W1H）</label><textarea id="d2" placeholder="いつ・どこで・何が・なぜ・誰が・どのように"></textarea></div>
+      </div>
+      <div class="d-step">
+        <div class="d-num">D3</div>
+        <div class="field" style="width:100%"><label>暫定処置（封じ込め）</label><textarea id="d3" placeholder="流出防止・在庫確認・暫定対策の内容"></textarea></div>
+      </div>
+      <div class="d-step">
+        <div class="d-num">D4</div>
+        <div class="field" style="width:100%"><label>根本原因の特定</label><textarea id="d4" placeholder="5Why / 特性要因図による真因分析"></textarea></div>
+      </div>
+      <div class="d-step">
+        <div class="d-num">D5</div>
+        <div class="field" style="width:100%"><label>恒久是正処置の選定</label><textarea id="d5" placeholder="根本原因を排除する処置案と選定理由"></textarea></div>
+      </div>
+      <div class="d-step">
+        <div class="d-num">D6</div>
+        <div class="field" style="width:100%"><label>恒久是正処置の実施・確認</label><textarea id="d6" placeholder="実施内容・効果確認方法・完了日"></textarea></div>
+      </div>
+      <div class="d-step">
+        <div class="d-num">D7</div>
+        <div class="field" style="width:100%"><label>再発防止（水平展開）</label><textarea id="d7" placeholder="類似工程・類似製品への水平展開内容"></textarea></div>
+      </div>
+      <div class="d-step">
+        <div class="d-num">D8</div>
+        <div class="field" style="width:100%"><label>チーム評価・完了</label><textarea id="d8" placeholder="活動の振り返り・チームへの感謝・完了承認"></textarea></div>
+      </div>
+    </div>
+    <br>
+    <button class="btn" onclick="export8D()">テキスト出力</button>
+  </div>
+  <div id="d-output" style="display:none" class="result-box">
+    <pre id="d-text" style="font-family:var(--mono);font-size:12px;white-space:pre-wrap;line-height:1.8;color:var(--text)"></pre>
+  </div>
+</div>
+
+<!-- ==================== 5WHY ==================== -->
+<div id="page-fivewhy" class="page">
+  <div class="page-header">
+    <h2>5Why 分析</h2>
+    <p>「なぜ」を繰り返して根本原因を特定します（ISO 10.2 / IATF 8.7）</p>
+  </div>
+  <div class="card">
+    <div class="card-title">問題の定義</div>
+    <div class="field"><label>発生した問題（起点）</label><input type="text" id="problem-stmt" placeholder="例：ラインで寸法不良が発生した"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">なぜなぜ分析</div>
+    <div class="why-chain">
+      <div class="why-item">
+        <div class="why-connector"><div class="why-circle">W1</div><div class="why-line"></div></div>
+        <div class="why-content"><div class="why-label">なぜ1 — 直接原因</div><input type="text" id="w1" placeholder="なぜそれが起きたか？"></div>
+      </div>
+      <div class="why-item">
+        <div class="why-connector"><div class="why-circle">W2</div><div class="why-line"></div></div>
+        <div class="why-content"><div class="why-label">なぜ2</div><input type="text" id="w2" placeholder="なぜW1が起きたか？"></div>
+      </div>
+      <div class="why-item">
+        <div class="why-connector"><div class="why-circle">W3</div><div class="why-line"></div></div>
+        <div class="why-content"><div class="why-label">なぜ3</div><input type="text" id="w3" placeholder="なぜW2が起きたか？"></div>
+      </div>
+      <div class="why-item">
+        <div class="why-connector"><div class="why-circle">W4</div><div class="why-line"></div></div>
+        <div class="why-content"><div class="why-label">なぜ4</div><input type="text" id="w4" placeholder="なぜW3が起きたか？"></div>
+      </div>
+      <div class="why-item">
+        <div class="why-connector"><div class="why-circle">W5</div></div>
+        <div class="why-content"><div class="why-label">なぜ5 — 根本原因</div><input type="text" id="w5" placeholder="なぜW4が起きたか？（ここが真因）"></div>
+      </div>
+    </div>
+    <br>
+    <div class="field"><label>是正処置（根本原因への対策）</label><textarea id="w-action" placeholder="根本原因を排除するための具体的な処置"></textarea></div>
+    <br>
+    <button class="btn" onclick="export5Why()">分析結果を出力</button>
+  </div>
+  <div id="why-output" style="display:none" class="result-box">
+    <pre id="why-text" style="font-family:var(--mono);font-size:12px;white-space:pre-wrap;line-height:1.8;color:var(--text)"></pre>
+  </div>
+</div>
+
+<!-- ==================== CHECKLIST ==================== -->
+<div id="page-checklist" class="page">
+  <div class="page-header">
+    <h2>監査前チェックリスト</h2>
+    <p>ISO9001 / IATF16949 内部監査前の確認事項</p>
+  </div>
+  <div class="card">
+    <div class="card-title">進捗</div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>完了項目</span><span id="cl-progress-text">0 / 0</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="cl-bar" style="width:0%;background:var(--green)"></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">品質マネジメントシステム</div>
+    <div class="check-items" id="cl-qms"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">リソース管理</div>
+    <div class="check-items" id="cl-resource"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">運用管理</div>
+    <div class="check-items" id="cl-ops"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">IATF固有要求</div>
+    <div class="check-items" id="cl-iatf"></div>
+  </div>
+  <button class="btn btn-ghost" onclick="resetChecklist()">リセット</button>
+</div>
+
+<!-- ==================== QUIZ ==================== -->
+<div id="page-quiz" class="page">
+  <div class="page-header">
+    <h2>ISO / IATF クイズ</h2>
+    <p>条項知識を確認します — 面接対策にも！</p>
+  </div>
+  <div class="card">
+    <div class="quiz-meta">
+      <div class="quiz-score">スコア: <span id="q-score">0</span> / <span id="q-total">0</span></div>
+      <div class="quiz-clause" id="q-clause"></div>
+    </div>
+    <div class="quiz-question" id="q-question">読み込み中...</div>
+    <div class="quiz-options" id="q-options"></div>
+    <div class="quiz-explain" id="q-explain"></div>
+    <br>
+    <button class="btn" id="q-next" onclick="nextQuestion()" style="display:none">次の問題 →</button>
+  </div>
+</div>
+
+<script>
+// ==================== NAV ====================
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ==================== PPM ====================
+function calcPPM() {
+  const total = parseFloat(document.getElementById('ppm-total').value) || 0;
+  const ng    = parseFloat(document.getElementById('ppm-ng').value) || 0;
+  const target= parseFloat(document.getElementById('ppm-target').value) || 0;
+  const cost  = parseFloat(document.getElementById('ppm-cost').value) || 0;
+  if (!total) return;
+  const rate = (ng / total) * 100;
+  const ppm  = (ng / total) * 1e6;
+  const good = total - ng;
+  const diff = target ? ppm - target : null;
+  const loss = cost ? ng * cost : null;
+  const pct  = Math.min((ppm / 10000) * 100, 100);
+  const color = ppm <= 500 ? 'var(--green)' : ppm <= 3000 ? 'var(--yellow)' : 'var(--red)';
+  const cls   = ppm <= 500 ? 'val-green' : ppm <= 3000 ? 'val-yellow' : 'val-red';
+  document.getElementById('r-rate').innerHTML = `<span class="${cls}">${rate.toFixed(4)} %</span>`;
+  document.getElementById('r-ppm').innerHTML  = `<span class="${cls}">${ppm.toFixed(1)} ppm</span>`;
+  document.getElementById('r-good').textContent = good.toLocaleString() + ' 個';
+  if (diff !== null) {
+    const dc = diff > 0 ? 'val-red' : 'val-green';
+    const ds = diff > 0 ? `⚠️ 超過 +${diff.toFixed(0)}` : `✅ 達成 ${diff.toFixed(0)}`;
+    document.getElementById('r-diff').innerHTML = `<span class="${dc}">${ds} ppm</span>`;
+  } else {
+    document.getElementById('r-diff').textContent = '—';
+  }
+  document.getElementById('r-loss').textContent = loss ? `¥ ${(loss).toLocaleString()}` : '—';
+  document.getElementById('r-level').textContent = ppm <= 500 ? '優良' : ppm <= 3000 ? '要注意' : '要改善';
+  document.getElementById('r-bar').style.width = pct + '%';
+  document.getElementById('r-bar').style.background = color;
+  document.getElementById('ppm-result').style.display = 'block';
+}
+
+// ==================== CPK ====================
+function calcCpk() {
+  const usl   = parseFloat(document.getElementById('cpk-usl').value);
+  const lsl   = parseFloat(document.getElementById('cpk-lsl').value);
+  const mean  = parseFloat(document.getElementById('cpk-mean').value);
+  const sigma = parseFloat(document.getElementById('cpk-sigma').value);
+  if (!sigma) return;
+  const cp  = (usl - lsl) / (6 * sigma);
+  const cpu = (usl - mean) / (3 * sigma);
+  const cpl = (mean - lsl) / (3 * sigma);
+  const cpk = Math.min(cpu, cpl);
+  const cls = cpk >= 1.67 ? 'val-green' : cpk >= 1.33 ? 'val-blue' : 'val-red';
+  const judge = cpk >= 1.67 ? '✅ 優秀（新工程OK）' : cpk >= 1.33 ? '🟡 良好（量産OK）' : '❌ 要改善';
+  document.getElementById('r-cp').innerHTML    = `<span class="${cls}">${cp.toFixed(3)}</span>`;
+  document.getElementById('r-cpk').innerHTML   = `<span class="${cls}">${cpk.toFixed(3)}</span>`;
+  document.getElementById('r-cpu').textContent = cpu.toFixed(3);
+  document.getElementById('r-cpl').textContent = cpl.toFixed(3);
+  document.getElementById('r-cpk-judge').innerHTML = `<span class="${cls}">${judge}</span>`;
+  const pct = Math.min((cpk / 2) * 100, 100);
+  document.getElementById('r-cpk-bar').style.width = Math.max(pct, 5) + '%';
+  document.getElementById('r-cpk-bar').style.background = cpk >= 1.67 ? 'var(--green)' : cpk >= 1.33 ? 'var(--accent2)' : 'var(--red)';
+  document.getElementById('r-cpk-bar-label').textContent = `Cpk = ${cpk.toFixed(3)}`;
+  document.getElementById('cpk-result').style.display = 'block';
+}
+
+// ==================== OEE ====================
+function calcOEE() {
+  const plan   = parseFloat(document.getElementById('oee-plan').value);
+  const stop   = parseFloat(document.getElementById('oee-stop').value);
+  const cycle  = parseFloat(document.getElementById('oee-cycle').value);
+  const actual = parseFloat(document.getElementById('oee-actual').value);
+  const ng     = parseFloat(document.getElementById('oee-ng').value);
+  const opTime = plan - stop;
+  const avail  = opTime / plan;
+  const ideal  = opTime * 60 / cycle;
+  const perf   = actual / ideal;
+  const qual   = (actual - ng) / actual;
+  const oee    = avail * perf * qual;
+  const fmtPct = v => (v * 100).toFixed(1) + ' %';
+  const cls = v => v >= 0.85 ? 'val-green' : v >= 0.65 ? 'val-yellow' : 'val-red';
+  document.getElementById('r-avail').innerHTML = `<span class="${cls(avail)}">${fmtPct(avail)}</span>`;
+  document.getElementById('r-perf').innerHTML  = `<span class="${cls(perf)}">${fmtPct(perf)}</span>`;
+  document.getElementById('r-qual').innerHTML  = `<span class="${cls(qual)}">${fmtPct(qual)}</span>`;
+  document.getElementById('r-oee').innerHTML   = `<span class="${cls(oee)}">${fmtPct(oee)}</span>`;
+  const judge = oee >= 0.85 ? '✅ World Class（85%以上）' : oee >= 0.65 ? '🟡 普通（65-85%）' : '❌ 要改善（65%未満）';
+  document.getElementById('r-oee-judge').innerHTML = `<span class="${cls(oee)}">${judge}</span>`;
+  document.getElementById('oee-result').style.display = 'block';
+}
+
+// ==================== FMEA ====================
+let fmeaRows = 0;
+function addFmeaRow() {
+  fmeaRows++;
+  const tbody = document.getElementById('fmea-body');
+  const tr = document.createElement('tr');
+  tr.id = 'fmea-row-' + fmeaRows;
+  tr.innerHTML = `
+    <td><input type="text" placeholder="組立工程"></td>
+    <td><input type="text" placeholder="寸法不良"></td>
+    <td><input type="text" placeholder="機能不全"></td>
+    <td><input type="number" id="s-${fmeaRows}" min="1" max="10" value="5" oninput="updateRPN(${fmeaRows})"></td>
+    <td><input type="text" placeholder="治具摩耗"></td>
+    <td><input type="number" id="o-${fmeaRows}" min="1" max="10" value="3" oninput="updateRPN(${fmeaRows})"></td>
+    <td><input type="text" placeholder="定期点検"></td>
+    <td><input type="number" id="d-${fmeaRows}" min="1" max="10" value="4" oninput="updateRPN(${fmeaRows})"></td>
+    <td class="rpn-cell" id="rpn-${fmeaRows}">60</td>
+    <td id="pri-${fmeaRows}"><span class="badge badge-yellow">中</span></td>
+  `;
+  tbody.appendChild(tr);
+  updateRPN(fmeaRows);
+}
+function updateRPN(i) {
+  const s = parseInt(document.getElementById('s-'+i)?.value)||1;
+  const o = parseInt(document.getElementById('o-'+i)?.value)||1;
+  const d = parseInt(document.getElementById('d-'+i)?.value)||1;
+  const rpn = s * o * d;
+  const el = document.getElementById('rpn-'+i);
+  const pe = document.getElementById('pri-'+i);
+  if (!el) return;
+  el.textContent = rpn;
+  el.className = 'rpn-cell ' + (rpn > 100 ? 'val-red' : rpn > 50 ? 'val-yellow' : 'val-green');
+  if (pe) pe.innerHTML = rpn > 100
+    ? '<span class="badge badge-red">高</span>'
+    : rpn > 50 ? '<span class="badge badge-yellow">中</span>'
+    : '<span class="badge badge-green">低</span>';
+}
+function calcAllRPN() { for(let i=1;i<=fmeaRows;i++) updateRPN(i); }
+// Init with 3 rows
+for(let i=0;i<3;i++) { setTimeout(addFmeaRow, 0); }
+
+// ==================== SAMPLING ====================
+const AQL_TABLE = {
+  // [lotMin, lotMax, codeNormal, codeTight, codeReduced]
+  levels: [
+    [2,8,'A','A','A'],
+    [9,15,'A','A','A'],
+    [16,25,'B','B','A'],
+    [26,50,'C','C','B'],
+    [51,90,'C','D','B'],
+    [91,150,'D','E','C'],
+    [151,280,'E','F','C'],
+    [281,500,'F','G','D'],
+    [501,1200,'G','H','E'],
+    [1201,3200,'H','J','F'],
+    [3201,10000,'J','K','G'],
+    [10001,35000,'K','L','H'],
+    [35001,150000,'L','M','J'],
+  ],
+  // code: {n, ac by AQL: {0.65,1.0,1.5,2.5,4.0,6.5}}
+  plans: {
+    'A': {n:2,  aql:{0.65:[0,1],1.0:[0,1],1.5:[0,1],2.5:[0,1],4.0:[0,1],6.5:[0,1]}},
+    'B': {n:3,  aql:{0.65:[0,1],1.0:[0,1],1.5:[0,1],2.5:[0,1],4.0:[0,1],6.5:[0,1]}},
+    'C': {n:5,  aql:{0.65:[0,1],1.0:[0,1],1.5:[0,1],2.5:[0,1],4.0:[0,1],6.5:[0,1]}},
+    'D': {n:8,  aql:{0.65:[0,1],1.0:[0,1],1.5:[0,1],2.5:[0,1],4.0:[0,1],6.5:[1,2]}},
+    'E': {n:13, aql:{0.65:[0,1],1.0:[0,1],1.5:[0,1],2.5:[0,1],4.0:[1,2],6.5:[1,2]}},
+    'F': {n:20, aql:{0.65:[0,1],1.0:[0,1],1.5:[0,1],2.5:[1,2],4.0:[1,2],6.5:[2,3]}},
+    'G': {n:32, aql:{0.65:[0,1],1.0:[0,1],1.5:[1,2],2.5:[1,2],4.0:[2,3],6.5:[3,4]}},
+    'H': {n:50, aql:{0.65:[0,1],1.0:[1,2],1.5:[1,2],2.5:[2,3],4.0:[3,4],6.5:[5,6]}},
+    'J': {n:80, aql:{0.65:[1,2],1.0:[1,2],1.5:[2,3],2.5:[3,4],4.0:[5,6],6.5:[7,8]}},
+    'K': {n:125,aql:{0.65:[1,2],1.0:[2,3],1.5:[3,4],2.5:[5,6],4.0:[7,8],6.5:[10,11]}},
+    'L': {n:200,aql:{0.65:[2,3],1.0:[3,4],1.5:[5,6],2.5:[7,8],4.0:[10,11],6.5:[14,15]}},
+    'M': {n:315,aql:{0.65:[3,4],1.0:[5,6],1.5:[7,8],2.5:[10,11],4.0:[14,15],6.5:[21,22]}},
+  }
+};
+function calcAQL() {
+  const lot = parseInt(document.getElementById('aql-lot').value);
+  const aql = parseFloat(document.getElementById('aql-level').value);
+  const ins = document.getElementById('aql-inspect').value;
+  const idx = ins === 'normal' ? 2 : ins === 'tightened' ? 3 : 4;
+  let code = 'G';
+  for (const row of AQL_TABLE.levels) {
+    if (lot >= row[0] && lot <= row[1]) { code = row[idx]; break; }
+  }
+  const plan = AQL_TABLE.plans[code];
+  if (!plan) return;
+  const acre = plan.aql[aql] || [0,1];
+  document.getElementById('r-aql-code').textContent = code;
+  document.getElementById('r-aql-n').textContent = plan.n + ' 個';
+  document.getElementById('r-aql-ac').textContent = acre[0] + ' 個以下 → 合格';
+  document.getElementById('r-aql-re').textContent = acre[1] + ' 個以上 → 不合格';
+  document.getElementById('r-aql-rate').textContent = ((plan.n / lot) * 100).toFixed(2) + ' %';
+  document.getElementById('aql-result').style.display = 'block';
+}
+
+// ==================== 8D ====================
+function export8D() {
+  const num     = document.getElementById('d-num').value || '—';
+  const date    = document.getElementById('d-date').value || '—';
+  const product = document.getElementById('d-product').value || '—';
+  const owner   = document.getElementById('d-owner').value || '—';
+  let txt = `════════════════════════════════════════
+8D 報告書  No. ${num}
+発生日: ${date}   製品: ${product}   担当: ${owner}
+════════════════════════════════════════\n\n`;
+  const labels = ['チーム編成','問題の記述（5W1H）','暫定処置（封じ込め）','根本原因の特定','恒久是正処置の選定','恒久是正処置の実施・確認','再発防止（水平展開）','チーム評価・完了'];
+  for(let i=1;i<=8;i++){
+    const v = document.getElementById('d'+i).value || '（未記入）';
+    txt += `【D${i}】${labels[i-1]}\n${v}\n\n`;
+  }
+  document.getElementById('d-text').textContent = txt;
+  document.getElementById('d-output').style.display = 'block';
+}
+
+// ==================== 5WHY ====================
+function export5Why() {
+  const prob = document.getElementById('problem-stmt').value || '（未入力）';
+  const ws   = [1,2,3,4,5].map(i => document.getElementById('w'+i).value || '（未記入）');
+  const act  = document.getElementById('w-action').value || '（未記入）';
+  let txt = `════════════════════════════════════════
+5Why 分析
+════════════════════════════════════════
+
+【問題】${prob}
+
+なぜ1（直接原因）: ${ws[0]}
+  ↓
+なぜ2: ${ws[1]}
+  ↓
+なぜ3: ${ws[2]}
+  ↓
+なぜ4: ${ws[3]}
+  ↓
+なぜ5（根本原因）: ${ws[4]}
+
+【是正処置】
+${act}
+`;
+  document.getElementById('why-text').textContent = txt;
+  document.getElementById('why-output').style.display = 'block';
+}
+
+// ==================== CHECKLIST ====================
+const CHECKLIST = {
+  'cl-qms': [
+    {t:'品質方針・品質目標が文書化・周知されている', c:'ISO 4.2 / 6.2'},
+    {t:'品質マニュアルまたは文書化された情報が最新版である', c:'ISO 7.5'},
+    {t:'内部監査のスケジュールと記録が整備されている', c:'ISO 9.2'},
+    {t:'マネジメントレビューの記録が直近1年以内にある', c:'ISO 9.3'},
+    {t:'不適合・是正処置の記録が維持されている', c:'ISO 10.2'},
+    {t:'継続的改善の取り組み・実績が確認できる', c:'ISO 10.3'},
+  ],
+  'cl-resource': [
+    {t:'力量評価記録（教育訓練マトリクス）が最新版である', c:'ISO 7.2'},
+    {t:'設備・機器の校正記録・有効期限が管理されている', c:'ISO 7.1.5'},
+    {t:'作業環境の管理基準と記録がある', c:'ISO 7.1.4'},
+    {t:'組織の知識（ナレッジ）が文書化されている', c:'ISO 7.1.6'},
+    {t:'インフラ（設備リスト）が維持・更新されている', c:'ISO 7.1.3'},
+  ],
+  'cl-ops': [
+    {t:'コントロールプランが最新版で現場と一致している', c:'IATF 8.5.1'},
+    {t:'作業標準書・作業手順書が現場に掲示されている', c:'ISO 8.1'},
+    {t:'変更管理の記録（エンジニアリングチェンジ）がある', c:'IATF 8.5.6'},
+    {t:'初品・最終品の保管ルールが守られている', c:'IATF 8.5.1'},
+    {t:'トレーサビリティ記録（ロット追跡）が可能である', c:'ISO 8.5.2'},
+    {t:'外部提供者（購買先）の評価記録がある', c:'ISO 8.4'},
+    {t:'出荷検査・受入検査の記録が維持されている', c:'ISO 8.6'},
+  ],
+  'cl-iatf': [
+    {t:'MSA（測定システム解析）の記録がある', c:'IATF 7.1.5.1'},
+    {t:'SPC（統計的工程管理）データが管理されている', c:'IATF 8.5.1'},
+    {t:'PFMEA・Control Planが連動している（相互整合性）', c:'IATF 8.5.1'},
+    {t:'顧客固有要求事項（CSR）が文書に反映されている', c:'IATF 4.3.2'},
+    {t:'緊急対応計画（コンティンジェンシープラン）がある', c:'IATF 6.1.2.3'},
+    {t:'防錆・防塵など特殊特性の管理記録がある', c:'IATF 8.5.1'},
+  ]
+};
+function buildChecklist() {
+  Object.keys(CHECKLIST).forEach(id => {
+    const container = document.getElementById(id);
+    if (!container) return;
+    CHECKLIST[id].forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'check-item';
+      div.id = `ci-${id}-${i}`;
+      div.innerHTML = `<div class="check-box">✓</div><span class="check-text">${item.t}</span><span class="check-clause">${item.c}</span>`;
+      div.onclick = () => toggleCheck(div);
+      container.appendChild(div);
+    });
+  });
+  updateCLProgress();
+}
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  updateCLProgress();
+}
+function updateCLProgress() {
+  const all     = document.querySelectorAll('.check-item').length;
+  const checked = document.querySelectorAll('.check-item.checked').length;
+  const pct = all ? (checked / all) * 100 : 0;
+  document.getElementById('cl-progress-text').textContent = `${checked} / ${all}`;
+  document.getElementById('cl-bar').style.width = pct + '%';
+}
+function resetChecklist() {
+  document.querySelectorAll('.check-item').forEach(el => el.classList.remove('checked'));
+  updateCLProgress();
+}
+
+// ==================== QUIZ ====================
+const QUESTIONS = [
+  {q:'ISO 9001の「リスク及び機会への取組み」は何条に規定されているか？',opts:['4.1','5.1','6.1','8.1'],ans:2,clause:'ISO 6.1',exp:'6.1条「リスク及び機会への取組み」。組織はリスクを特定し、望ましくない影響を防止するための計画が必要。'},
+  {q:'IATF 16949において「コントロールプラン」の作成が明示的に要求される条項はどれか？',opts:['7.5.3','8.3.3','8.5.1','9.1.1'],ans:2,clause:'IATF 8.5.1',exp:'8.5.1.1にControl Planの要求事項が詳細に規定されている。受入・工程内・出荷の3種類が必要。'},
+  {q:'ISO 9001:2015の「組織の知識」（Organizational Knowledge）は何条か？',opts:['6.1','7.1.6','8.4.1','9.1.3'],ans:1,clause:'ISO 7.1.6',exp:'7.1.6「組織の知識」。組織の運用に必要な知識を維持し、変化するニーズに対して取得を考慮する。'},
+  {q:'MSA（測定システム解析）はIATF 16949の何条で要求されているか？',opts:['7.1.5.1','8.5.1','9.1.1','10.2'],ans:0,clause:'IATF 7.1.5.1',exp:'7.1.5.1.1「測定システム解析」。ゲージR&Rなどの測定システムの統計的解析が要求される。'},
+  {q:'是正処置の要求事項はISO 9001のどの条項か？',opts:['8.7','9.2','10.2','10.3'],ans:2,clause:'ISO 10.2',exp:'10.2「不適合及び是正処置」。不適合発生時の対応・根本原因分析・再発防止が要求される。'},
+  {q:'Cpkが1.67以上であることはIATFで何を意味するか？',opts:['工程の改善が必要','量産可能だが監視が必要','新工程として承認できる優秀な水準','サンプリングを強化すべき水準'],ans:2,clause:'IATF 8.5.1',exp:'Cpk≥1.67は新工程・特殊特性の初期工程能力要求水準。量産継続はCpk≥1.33が目安。'},
+  {q:'PPMとは何の略か？',opts:['Parts Per Million','Process Performance Metric','Production Process Monitoring','Plan-Process-Measurement'],ans:0,clause:'品質基礎',exp:'Parts Per Million（百万分率）。100万個中の不良品数を表す。PPM = 不良数 ÷ 総数 × 1,000,000'},
+  {q:'FMEA の RPN は何の積か？',opts:['重篤度×発生頻度×コスト','重篤度×発生頻度×検出度','発生頻度×検出度×工程数','重篤度×コスト×検出度'],ans:1,clause:'IATF 8.5.1',exp:'RPN = Severity(重篤度) × Occurrence(発生度) × Detection(検出度)。各1〜10点で最大1000。'},
+  {q:'ISO 9001:2015においてPDCAサイクルはどの構造に対応しているか？',opts:['4章〜10章全体','5章〜8章','6章〜9章','7章〜10章'],ans:0,clause:'ISO 0.3',exp:'P=4〜6章（計画）、D=7〜8章（実施）、C=9章（確認）、A=10章（改善）に対応している。'},
+  {q:'顧客固有要求事項（CSR）はIATF 16949のどの概念か？',opts:['組織固有の任意要求','顧客が定める追加・代替要求事項','ISO 9001の基本要求','第三者機関の審査基準'],ans:1,clause:'IATF 4.3.2',exp:'Customer Specific Requirements。顧客がIATFの要求に加えて定める固有の要求事項。組織は識別・適用が必要。'},
+  {q:'OEEの計算式はどれか？',opts:['稼働率＋性能率＋品質率','稼働率×性能率×品質率','良品数÷計画生産数','設備稼働時間÷計画時間'],ans:1,clause:'IATF 8.5.1',exp:'OEE = 稼働率(Availability) × 性能率(Performance) × 品質率(Quality)。世界標準は85%以上。'},
+  {q:'内部監査の要求事項はISO 9001のどの条項か？',opts:['8.1','9.1','9.2','9.3'],ans:2,clause:'ISO 9.2',exp:'9.2「内部監査」。計画的に実施し、QMSが要求事項に適合し、有効に実施されているか確認する。'},
+];
+
+let qIdx = 0, qScore = 0, qAnswered = false;
+const shuffled = [...QUESTIONS].sort(()=>Math.random()-0.5);
+
+function loadQuestion() {
+  const q = shuffled[qIdx % shuffled.length];
+  qAnswered = false;
+  document.getElementById('q-question').textContent = q.q;
+  document.getElementById('q-clause').textContent = q.clause;
+  document.getElementById('q-explain').style.display = 'none';
+  document.getElementById('q-next').style.display = 'none';
+  document.getElementById('q-total').textContent = qIdx + 1;
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const d = document.createElement('div');
+    d.className = 'quiz-option';
+    d.textContent = o;
+    d.onclick = () => answerQ(i, q.ans, q.exp);
+    opts.appendChild(d);
+  });
+}
+function answerQ(chosen, correct, exp) {
+  if (qAnswered) return;
+  qAnswered = true;
+  const opts = document.querySelectorAll('.quiz-option');
+  opts[correct].classList.add('correct');
+  if (chosen !== correct) opts[chosen].classList.add('wrong');
+  else qScore++;
+  document.getElementById('q-score').textContent = qScore;
+  document.getElementById('q-explain').textContent = '💡 ' + exp;
+  document.getElementById('q-explain').style.display = 'block';
+  document.getElementById('q-next').style.display = 'inline-block';
+}
+function nextQuestion() {
+  qIdx++;
+  loadQuestion();
+}
+
+// ==================== INIT ====================
+buildChecklist();
+loadQuestion();
+// Set today's date for 8D
+document.getElementById('d-date').valueAsDate = new Date();
+</script>
+</body>
+</html>
